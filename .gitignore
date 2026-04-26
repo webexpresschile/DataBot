@@ -1,22 +1,25 @@
-# n8n - has own repo for Railway deploy
-/n8n/
+# Dependencies
+node_modules/
+.next/
 
-# Temp files
-/resumen.txt
-/schema-clean.sql
-/schema-ready-to-copy.txt
+# Environment
+.env
+.env.local
+.env*.local
 
-# WebApp
-webapp/node_modules
-webapp/.next
-webapp/out
-webapp/.env
-webapp/.env.local
+# IDE
+.vscode/
+.idea/
 
 # OS
 .DS_Store
-*.pem
+Thumbs.db
 
-# IDE
-.vscode
-.idea
+# Build
+dist/
+build/
+out/
+
+# Logs
+*.log
+npm-debug.log*

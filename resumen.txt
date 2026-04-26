@@ -1,0 +1,33 @@
+# RESUMEN DEL PROYECTO DATABOT
+
+## ESTADO ACTUAL: PROTOTIPO FUNCIONAL - REPO SIN INICIALIZAR
+
+## ESTRUCTURA DEL PROYECTO
+
+- docs/          - Documentacion de Arquitectura (Listo)
+- supabase/      - Schema SQL y Setup (Listo)
+- n8n/           - Workflows de automatizacion (Listo)
+- webapp/        - Next.js app completa (Desarrollado)
+- README.md      - Guia paso a paso (Completo)
+- CHECKLIST.md   - Lista de tareas para despliegue (Completo)
+- .env.example   - Plantilla de variables de entorno (Lista)
+
+## GIT STATUS
+
+- Repo inicializado en branch main
+- SIN COMMITS
+- Sin remoto configurado
+- 7 archivos/carpetas sin seguimiento
+
+## TAREAS PENDIENTES DEL CHECKLIST
+
+1. Supabase - Crear proyecto en supabase.com y ejecutar schema.sql
+2. Ollama - Instalar y configurar nomic-embed-text (opcional)
+3. N8N - Desplegar en Railway e importar workflows
+4. Web App - Conectar a Vercel con variables de entorno
+5. Probar la App - Verificar funcional
+6. Agregar Manuales - Subir PDFs a Google Drive
+
+## COSTO ESTIMADO: $0/MES
+
+## PROXIMO PASSO: Crear proyecto en Supabase y configurar variables de entorno
