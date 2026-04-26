@@ -2,19 +2,19 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'DataBot - Asistente Técnico con IA',
-  description: 'Consulta manuales técnicos de fotocopiadoras, impresoras y equipos de oficina. Asistente inteligente con IA, disponible 24/7.',
+  title: 'Teknocopy — Asistente Técnico IA',
+  description: 'Herramienta interna de Teknocopy. Consulta manuales técnicos de equipos Ricoh, Samsung y Brother con inteligencia artificial.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'DataBot',
+    title: 'Teknocopy',
   },
   openGraph: {
-    title: 'DataBot - Asistente Técnico con IA',
-    description: 'Consulta manuales técnicos de equipos de oficina con inteligencia artificial.',
+    title: 'Teknocopy — Asistente Técnico IA',
+    description: 'Herramienta interna para técnicos. Consulta manuales Ricoh con IA.',
     type: 'website',
-    siteName: 'DataBot',
+    siteName: 'Teknocopy',
   },
   other: {
     'mobile-web-app-capable': 'yes',

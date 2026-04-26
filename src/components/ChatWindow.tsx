@@ -19,9 +19,9 @@ interface PendingMessage {
 
 const EXAMPLE_QUESTIONS = [
   { text: 'La Ricoh MP 2014 marca error SC542' },
-  { text: '¿Cómo cambiar fusor en Canon IR 2204?' },
-  { text: 'Error E000 en Kyocera Taskalfa' },
-  { text: 'Atasco de papel en bandeja 2' },
+  { text: 'Error SC899 en Ricoh IM C4500' },
+  { text: 'Ajustar registro de color Ricoh Pro C5200' },
+  { text: 'Cómo entrar a service mode Ricoh MP 2555' },
 ]
 
 function deviceId(): string {
@@ -128,7 +128,7 @@ export default function ChatWindow() {
         padding: '0 24px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <span className="ribbon-label" style={{ fontSize: '0.6875rem', letterSpacing: '1px' }}>DataBot</span>
+          <span className="ribbon-label" style={{ fontSize: '0.6875rem', letterSpacing: '1px' }}>Teknocopy</span>
           <span style={{
             fontFamily: 'var(--font-mono)',
             fontSize: '0.625rem',
@@ -166,15 +166,15 @@ export default function ChatWindow() {
             textAlign: 'center',
           }}>
             <span className="kicker" style={{ marginBottom: 12, color: 'var(--caption-gray)' }}>
-              Asistente técnico IA
+              Herramienta interna · Teknocopy
             </span>
 
             <h1 className="display-hero" style={{ marginBottom: 16 }}>
-              DataBot
+              Teknocopy
             </h1>
 
             <p className="article-deck" style={{ color: 'var(--caption-gray)', maxWidth: 420, marginBottom: 40 }}>
-              Consulta manuales técnicos de fotocopiadoras, impresoras y equipos de oficina.
+              Asistente técnico interno. Consulta manuales Ricoh, Samsung y Brother al instante.
             </p>
 
             <div style={{ width: '100%', maxWidth: 480 }}>
@@ -278,7 +278,7 @@ export default function ChatWindow() {
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, minHeight: 18 }}>
             <span className="timestamp" style={{ fontSize: '0.625rem', letterSpacing: '0.8px' }}>
-              Asistente técnico IA
+              Teknocopy · Herramienta interna
             </span>
             <span className="timestamp" style={{ fontSize: '0.625rem', letterSpacing: '0.8px' }}>
               ⏎ Enviar · ⇧⏎ Salto

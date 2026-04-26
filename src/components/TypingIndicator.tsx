@@ -2,7 +2,7 @@ export default function TypingIndicator() {
   return (
     <div style={{ marginBottom: 20 }}>
       <span className="kicker" style={{ fontSize: '0.6875rem', letterSpacing: '0.8px', marginBottom: 6, display: 'block', color: 'var(--caption-gray)' }}>
-        DataBot
+        Teknocopy
       </span>
       <div style={{
         display: 'inline-flex',
