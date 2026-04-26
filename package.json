@@ -1,3 +1,4 @@
+Removed @supabase/ssr
 {
   "name": "databot-webapp",
   "version": "0.1.0",
@@ -9,7 +10,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.5.0",
     "@supabase/supabase-js": "^2.44.0",
     "next": "14.2.3",
     "react": "^18.3.1",
