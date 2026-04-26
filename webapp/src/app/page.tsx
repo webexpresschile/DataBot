@@ -1,3 +1,5 @@
+'use client'
+
 import ChatWindow from '@/components/ChatWindow'
 import { useServiceWorker } from '@/hooks/useServiceWorker'
 

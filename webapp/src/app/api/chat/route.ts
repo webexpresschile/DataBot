@@ -1,11 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
-import { createClient } from '@supabase/ssr'
-
-const anthropic = new Anthropic({
-  apiKey: process.env.MINIMAX_API_KEY!,
-  baseURL: 'https://api.minimax.io/anthropic'
-})
+import { createClient } from '@/lib/supabase'
 
 const supabase = createClient()
 
@@ -49,18 +43,25 @@ Instrucciones:
 Contexto del manual:
 ${context || 'No hay manuales cargados aún.'}`
 
-    const message = await anthropic.messages.create({
-      model: 'MiniMax-M2.5',
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages: [
-        { role: 'user', content: question }
-      ]
+    // Usar DeepSeek en vez de MiniMax
+    const deepseekResponse = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: question }
+        ],
+        max_tokens: 1024
+      })
     })
 
-    const answer = message.content[0].type === 'text'
-      ? message.content[0].text
-      : 'No se pudo generar respuesta'
+    const deepseekData = await deepseekResponse.json()
+    const answer = deepseekData.choices?.[0]?.message?.content || 'No se pudo generar respuesta'
 
     if (session_id) {
       await supabase.from('mensajes').insert({
@@ -87,14 +88,17 @@ ${context || 'No hay manuales cargados aún.'}`
 }
 
 async function generateEmbedding(text: string) {
-  const apiKey = process.env.OPENAI_API_KEY || ''
-  const baseUrl = process.env.EMBEDDING_BASE_URL || 'https://api.openai.com/v1'
+  // Usar OpenRouter para embeddings (gratis con crédito inicial)
+  const apiKey = process.env.OPENROUTER_API_KEY || ''
+  const baseUrl = process.env.EMBEDDING_BASE_URL || 'https://openrouter.ai/api/v1'
   
   const response = await fetch(`${baseUrl}/embeddings`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+      'X-Title': 'DataBot'
     },
     body: JSON.stringify({
       model: process.env.EMBEDDING_MODEL || 'text-embedding-ada-002',
