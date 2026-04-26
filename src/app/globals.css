@@ -1,80 +1,40 @@
-/* ===== DataBot - Modern SaaS Design System ===== */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* ===== DataBot — WIRED Magazine Design System ===== */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
 
+/* ===== CSS Custom Properties ===== */
 :root {
-  /* Brand */
-  --primary: #4F46E5;
-  --primary-dark: #4338CA;
-  --primary-light: #A5B4FC;
-  --primary-glow: rgba(79, 70, 229, 0.15);
-
-  /* Accents */
-  --success: #10B981;
-  --warning: #F59E0B;
-  --error: #EF4444;
+  /* Editorial Ink */
+  --ink: #000000;
+  --page-ink: #1a1a1a;
+  --paper: #ffffff;
+  --link-blue: #057dbc;
 
   /* Surfaces */
-  --bg: #FAFAFA;
-  --bg-card: #FFFFFF;
-  --bg-elevated: #FFFFFF;
-  --bg-input: #F3F4F6;
-  --bg-hover: #F9FAFB;
-  --border: #E5E7EB;
-  --border-light: #F3F4F6;
+  --footer-ink: #1a1a1a;
+  --hairline: #e2e8f0;
 
   /* Text */
-  --text-primary: #111827;
-  --text-secondary: #6B7280;
-  --text-tertiary: #9CA3AF;
-  --text-inverse: #FFFFFF;
+  --headline: #1a1a1a;
+  --body: #1a1a1a;
+  --caption: #757575;
+  --disabled: #999999;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -1px rgba(0,0,0,0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
-  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
-  --shadow-glow: 0 0 20px var(--primary-glow);
+  /* Typography stacks */
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  --font-sans: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-  /* Radii */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-full: 9999px;
+  /* Spacing */
+  --measure: 680px;
+  --gutter: 24px;
+  --rule: 1px;
 
-  /* Animation */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
-  --duration-fast: 150ms;
-  --duration-normal: 250ms;
-  --duration-slow: 400ms;
-
-  /* Layout */
-  --header-height: 64px;
-  --max-chat-width: 768px;
+  /* Tracking */
+  --tracking-kicker: 0.08em;
+  --tracking-wide: 0.04em;
 }
 
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0F1117;
-    --bg-card: #1A1D28;
-    --bg-elevated: #222639;
-    --bg-input: #1E2030;
-    --bg-hover: #252839;
-    --border: #2D3143;
-    --border-light: #1E2030;
-    --text-primary: #EDEDEF;
-    --text-secondary: #9CA3AF;
-    --text-tertiary: #6B7280;
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
-    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.3);
-    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.3);
-    --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.4);
-    --primary-glow: rgba(99, 102, 241, 0.12);
-  }
-}
-
+/* ===== Reset & Base ===== */
 * {
   box-sizing: border-box;
 }
@@ -85,64 +45,131 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
   margin: 0;
   padding: 0;
-  background: var(--bg);
-  color: var(--text-primary);
+  background: var(--paper);
+  color: var(--body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
 }
 
-/* Scrollbar */
+/* Scrollbar — thin, square */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: var(--text-tertiary);
-  border-radius: var(--radius-full);
-  opacity: 0.5;
+  background: var(--hairline);
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
+  background: var(--caption);
 }
 
 /* Selection */
 ::selection {
-  background: var(--primary);
-  color: var(--text-inverse);
+  background: var(--ink);
+  color: var(--paper);
 }
 
-/* Focus ring */
-*:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+/* ===== Typography ===== */
+h1, h2, h3 {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--headline);
+  margin: 0;
 }
 
-/* Animations */
-@keyframes slideInUp {
+h1 { font-size: 2.5rem; }
+h2 { font-size: 1.75rem; }
+h3 { font-size: 1.25rem; }
+
+p, li {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--body);
+}
+
+/* Mono kicker utility — the WIRED signature */
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-kicker);
+  color: var(--caption);
+  margin: 0;
+}
+
+/* Hairline rule */
+hr {
+  border: none;
+  border-top: var(--rule) solid var(--hairline);
+  margin: 0;
+}
+
+/* ===== Layout ===== */
+.container {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+/* ===== Buttons ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+  text-decoration: none;
+  border-radius: 0; /* square corners */
+}
+
+.btn:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ===== Links ===== */
+a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+
+a:hover {
+  color: var(--link-blue);
+  border-bottom-color: var(--link-blue);
+}
+
+/* ===== Animations ===== */
+@keyframes typeIn {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes slideInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-12px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -150,65 +177,35 @@ body {
   }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes pulseGlow {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
-}
-
-@keyframes bounceDots {
-  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-  40% { transform: scale(1); opacity: 1; }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes scaleIn {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-.animate-slide-in-up {
-  animation: slideInUp var(--duration-normal) var(--ease-out);
-}
-
-.animate-slide-in-down {
-  animation: slideInDown var(--duration-normal) var(--ease-out);
-}
-
-.animate-fade-in {
-  animation: fadeIn var(--duration-slow) ease-out;
-}
-
-.animate-scale-in {
-  animation: scaleIn var(--duration-fast) var(--ease-out);
-}
-
-/* Shimmer loading */
-.shimmer {
-  background: linear-gradient(90deg, 
-    var(--bg-input) 0%, 
-    var(--bg-hover) 50%, 
-    var(--bg-input) 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: var(--radius-sm);
-}
-
-/* Glass effect for dark mode */
-@media (prefers-color-scheme: dark) {
-  .glass {
-    background: rgba(34, 38, 57, 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(45, 49, 67, 0.5);
+@keyframes dotPulse {
+  0%, 80%, 100% {
+    opacity: 0.2;
+    transform: scale(1);
   }
+  40% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+.animate-type-in {
+  animation: typeIn 200ms ease-out both;
+}
+
+/* ===== Focus ===== */
+*:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* ===== Utility ===== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
