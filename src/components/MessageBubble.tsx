@@ -29,9 +29,9 @@ export default function MessageBubble({ message }: Props) {
       }}>
         <p style={{
           margin: 0,
-          fontFamily: isUser ? 'var(--font-ui)' : 'var(--font-body)',
-          fontSize: isUser ? '0.9375rem' : '1rem',
-          lineHeight: isUser ? 1.6 : 1.65,
+          fontFamily: 'var(--font-ui)',
+          fontSize: '0.9375rem',
+          lineHeight: 1.65,
           color: 'var(--page-ink)',
           whiteSpace: 'pre-wrap',
           wordBreak: 'break-word',
