@@ -1,0 +1,8 @@
+{
+  "name": "databot",
+  "private": true,
+  "scripts": {
+    "build": "cd webapp && npm run build",
+    "dev": "cd webapp && npm run dev"
+  }
+}
