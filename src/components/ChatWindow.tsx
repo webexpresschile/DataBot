@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import MessageBubble from './MessageBubble'
 import TypingIndicator from './TypingIndicator'
@@ -24,12 +24,9 @@ const EXAMPLE_QUESTIONS = [
   { text: 'Atasco de papel en bandeja 2' },
 ]
 
-function getOrCreateDeviceId(): string {
+function deviceId(): string {
   let id = localStorage.getItem('databot_device_id')
-  if (!id) {
-    id = 'device_' + Math.random().toString(36).substr(2, 9)
-    localStorage.setItem('databot_device_id', id)
-  }
+  if (!id) { id = 'device_' + Math.random().toString(36).substr(2, 9); localStorage.setItem('databot_device_id', id) }
   return id
 }
 
@@ -42,66 +39,42 @@ export default function ChatWindow() {
   const [isOnline, setIsOnline] = useState(true)
   const [pendingMessages, setPendingMessages] = useState<PendingMessage[]>([])
   const [showExamples, setShowExamples] = useState(true)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const endRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const supabase = createClient()
 
   useEffect(() => {
     setIsOnline(navigator.onLine)
-    const handleOnline = () => { setIsOnline(true); flushPendingMessages() }
-    const handleOffline = () => setIsOnline(false)
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-
-    loadPendingFromStorage()
-    setSessionId(getOrCreateDeviceId())
-    loadCachedMessages()
-
-    return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-    }
+    const on = () => { setIsOnline(true); flushPending() }
+    const off = () => setIsOnline(false)
+    window.addEventListener('online', on); window.addEventListener('offline', off)
+    loadPending(); setSessionId(deviceId()); loadCache()
+    return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off) }
   }, [])
 
-  useEffect(() => { scrollToBottom() }, [messages])
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
-  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  function loadPending() {
+    try { const r = localStorage.getItem('databot_pending'); if (r) setPendingMessages(JSON.parse(r)) } catch {}
+  }
+  function savePending(p: PendingMessage[]) { localStorage.setItem('databot_pending', JSON.stringify(p)) }
 
-  function loadPendingFromStorage() {
+  async function flushPending() {
     try {
-      const raw = localStorage.getItem('databot_pending')
-      if (raw) setPendingMessages(JSON.parse(raw))
+      const r = localStorage.getItem('databot_pending')
+      if (!r) return
+      for (const m of JSON.parse(r) as PendingMessage[]) { try { await sendToServer(m.message.contenido) } catch {} }
+      localStorage.removeItem('databot_pending'); setPendingMessages([])
     } catch {}
   }
 
-  function savePending(msgs: PendingMessage[]) {
-    localStorage.setItem('databot_pending', JSON.stringify(msgs))
-  }
-
-  async function flushPendingMessages() {
+  function loadCache() {
     try {
-      const raw = localStorage.getItem('databot_pending')
-      if (!raw) return
-      const msgs: PendingMessage[] = JSON.parse(raw)
-      for (const msg of msgs) { try { await sendToServer(msg.message.contenido) } catch {} }
-      localStorage.removeItem('databot_pending')
-      setPendingMessages([])
+      const r = localStorage.getItem('databot_messages')
+      if (r) { const p: Message[] = JSON.parse(r); if (p.length) { setMessages(p); setShowExamples(false) } }
     } catch {}
   }
-
-  function loadCachedMessages() {
-    try {
-      const cached = localStorage.getItem('databot_messages')
-      if (cached) {
-        const parsed: Message[] = JSON.parse(cached)
-        if (parsed.length > 0) { setMessages(parsed); setShowExamples(false) }
-      }
-    } catch {}
-  }
-
-  function cacheMessages(msgs: Message[]) {
-    localStorage.setItem('databot_messages', JSON.stringify(msgs.slice(-50)))
-  }
+  function cacheMessages(m: Message[]) { localStorage.setItem('databot_messages', JSON.stringify(m.slice(-50))) }
 
   async function handleSubmit(e: React.FormEvent | string) {
     if (typeof e !== 'string') e.preventDefault()
@@ -109,103 +82,80 @@ export default function ChatWindow() {
     if (!text || loading) return
 
     setShowExamples(false)
-
-    const userMessage: Message = {
-      id: crypto.randomUUID(),
-      rol: 'user',
-      contenido: text,
-      created_at: new Date().toISOString(),
-    }
-
-    setMessages(prev => { const u = [...prev, userMessage]; cacheMessages(u); return u })
-    setInput('')
-    setLoading(true)
+    const userMsg: Message = { id: crypto.randomUUID(), rol: 'user', contenido: text, created_at: new Date().toISOString() }
+    setMessages(prev => { const u = [...prev, userMsg]; cacheMessages(u); return u })
+    setInput(''); setLoading(true)
 
     try {
-      if (isOnline) {
-        await sendToServer(userMessage.contenido)
-      } else {
-        const offlineMsg: Message = {
-          id: crypto.randomUUID(),
-          rol: 'assistant',
-          contenido: 'Sin conexión. Tu mensaje se enviará cuando recuperes internet.',
-          created_at: new Date().toISOString(),
-        }
-        setMessages(prev => { const u = [...prev, offlineMsg]; cacheMessages(u); return u })
-        const newPending = [...pendingMessages, { message: userMessage, timestamp: Date.now() }]
-        setPendingMessages(newPending)
-        savePending(newPending)
+      if (isOnline) await sendToServer(text)
+      else {
+        const offMsg: Message = { id: crypto.randomUUID(), rol: 'assistant', contenido: 'Sin conexión. Tu mensaje se enviará cuando recuperes internet.', created_at: new Date().toISOString() }
+        setMessages(prev => { const u = [...prev, offMsg]; cacheMessages(u); return u })
+        const np = [...pendingMessages, { message: userMsg, timestamp: Date.now() }]
+        setPendingMessages(np); savePending(np)
       }
     } catch {
-      const errMsg: Message = {
-        id: crypto.randomUUID(),
-        rol: 'assistant',
-        contenido: 'Error al procesar tu mensaje. Intenta de nuevo.',
-        created_at: new Date().toISOString(),
-      }
-      setMessages(prev => { const u = [...prev, errMsg]; cacheMessages(u); return u })
-    } finally {
-      setLoading(false)
-      inputRef.current?.focus()
-    }
+      const eMsg: Message = { id: crypto.randomUUID(), rol: 'assistant', contenido: 'Error al procesar tu mensaje. Intenta de nuevo.', created_at: new Date().toISOString() }
+      setMessages(prev => { const u = [...prev, eMsg]; cacheMessages(u); return u })
+    } finally { setLoading(false); inputRef.current?.focus() }
   }
 
   async function sendToServer(question: string) {
     const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question, session_id: sessionId, user_id: userId }),
     })
     if (!res.ok) throw new Error('Server error')
     const data = await res.json()
-    const assistantMsg: Message = {
-      id: crypto.randomUUID(),
-      rol: 'assistant',
-      contenido: data.answer,
-      created_at: new Date().toISOString(),
-    }
-    setMessages(prev => { const u = [...prev, assistantMsg]; cacheMessages(u); return u })
+    const aMsg: Message = { id: crypto.randomUUID(), rol: 'assistant', contenido: data.answer, created_at: new Date().toISOString() }
+    setMessages(prev => { const u = [...prev, aMsg]; cacheMessages(u); return u })
   }
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+  function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(e as any) }
   }
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', flexDirection: 'column', height: '100vh' }}>
-
-      {/* ===== HEADER — Editorial masthead ===== */}
-      <div style={{ borderBottom: '1px solid var(--hairline)', padding: '16px 24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-            <span style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '1.25rem',
-              fontWeight: 700,
-              color: 'var(--ink)',
-              letterSpacing: '-0.02em',
-            }}>
-              DataBot
-            </span>
-            <span className="kicker" style={{ fontSize: '0.625rem' }}>
-              {isOnline ? 'En línea' : 'Sin conexión'}
-            </span>
-          </div>
-          {pendingMessages.length > 0 && (
-            <span className="kicker" style={{ color: 'var(--caption)' }}>
-              {pendingMessages.length} pendiente{pendingMessages.length > 1 ? 's' : ''}
-            </span>
-          )}
+      
+      {/* ===== UTILITY BAR — Black strip ===== */}
+      <div style={{
+        background: 'var(--wired-black)',
+        height: 36,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 24px',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <span className="ribbon-label" style={{ fontSize: '0.6875rem', letterSpacing: '1px' }}>DataBot</span>
+          <span style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.625rem',
+            color: 'var(--caption-gray)',
+            letterSpacing: '0.8px',
+            textTransform: 'uppercase',
+          }}>
+            {isOnline ? 'En línea' : 'Sin conexión'}
+          </span>
         </div>
+        {pendingMessages.length > 0 && (
+          <span style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.625rem',
+            color: '#999',
+            letterSpacing: '0.8px',
+            textTransform: 'uppercase',
+          }}>
+            {pendingMessages.length} pendiente{pendingMessages.length > 1 ? 's' : ''}
+          </span>
+        )}
       </div>
 
       {/* ===== CHAT AREA ===== */}
-      <div style={{
-        flex: 1,
-        overflowY: 'auto',
-        padding: '24px',
-      }}>
-        {/* Welcome Screen */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '32px 24px' }}>
+
+        {/* ===== WELCOME — editorial hero ===== */}
         {messages.length === 0 && showExamples && (
           <div style={{
             display: 'flex',
@@ -215,89 +165,80 @@ export default function ChatWindow() {
             minHeight: 'calc(100vh - 280px)',
             textAlign: 'center',
           }}>
-            <h1 style={{ marginBottom: 8, fontSize: '2.5rem' }}>
-              Asistente Técnico
+            <span className="kicker" style={{ marginBottom: 12, color: 'var(--caption-gray)' }}>
+              Asistente técnico IA
+            </span>
+
+            <h1 className="display-hero" style={{ marginBottom: 16 }}>
+              DataBot
             </h1>
-            <p style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: '0.875rem',
-              color: 'var(--caption)',
-              maxWidth: 400,
-              margin: '0 auto 32px',
-              lineHeight: 1.7,
-            }}>
-              Consulta manuales técnicos de fotocopiadoras, impresoras y equipos de oficina con inteligencia artificial.
+
+            <p className="article-deck" style={{ color: 'var(--caption-gray)', maxWidth: 420, marginBottom: 40 }}>
+              Consulta manuales técnicos de fotocopiadoras, impresoras y equipos de oficina.
             </p>
 
-            <hr style={{ width: '100%', marginBottom: 24 }} />
+            <div style={{ width: '100%', maxWidth: 480 }}>
+              <hr className="hairline-black" style={{ marginBottom: 24 }} />
 
-            <span className="kicker" style={{ marginBottom: 12 }}>Consultas frecuentes</span>
+              <span className="kicker" style={{ marginBottom: 12, display: 'block', color: 'var(--caption-gray)' }}>
+                Consultas frecuentes
+              </span>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', maxWidth: 480 }}>
-              {EXAMPLE_QUESTIONS.map((q, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleSubmit(q.text)}
-                  className="animate-type-in"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '10px 16px',
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: '0.8125rem',
-                    color: 'var(--body)',
-                    background: 'var(--paper)',
-                    border: '1px solid var(--hairline)',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'border-color 150ms, color 150ms',
-                    animationDelay: `${i * 80}ms`,
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--ink)'; e.currentTarget.style.color = 'var(--ink)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--hairline)'; e.currentTarget.style.color = 'var(--body)' }}
-                >
-                  <span>{q.text}</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--caption)" strokeWidth="1.5">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                  </svg>
-                </button>
-              ))}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {EXAMPLE_QUESTIONS.map((q, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSubmit(q.text)}
+                    className="animate-in"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '10px 16px',
+                      background: 'var(--paper-white)',
+                      border: '1px solid var(--hairline-tint)',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      fontFamily: 'var(--font-ui)',
+                      fontSize: '0.8125rem',
+                      color: 'var(--page-ink)',
+                      transition: 'border-color 150ms, color 150ms',
+                      animationDelay: `${i * 80}ms`,
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--wired-black)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--hairline-tint)'; }}
+                  >
+                    <span>{q.text}</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--caption-gray)" strokeWidth="1.5">
+                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
 
-        {/* Messages */}
+        {/* ===== MESSAGE LIST ===== */}
         {messages.map((msg, i) => (
-          <div key={msg.id} className="animate-type-in" style={{ animationDelay: '50ms', marginBottom: 16 }}>
-            <MessageBubble message={msg} isLatest={i === messages.length - 1} />
+          <div key={msg.id} className="animate-in" style={{ animationDelay: '50ms', marginBottom: 20 }}>
+            <MessageBubble message={msg} />
           </div>
         ))}
 
         {loading && <TypingIndicator />}
-        <div ref={messagesEndRef} />
+        <div ref={endRef} />
       </div>
 
-      {/* ===== INPUT BAR — editorial quote style ===== */}
+      {/* ===== INPUT — 2px black border, square, Apercu ===== */}
       <div style={{
-        borderTop: '1px solid var(--hairline)',
+        borderTop: '1px solid var(--hairline-tint)',
         padding: '16px 24px',
-        background: 'var(--paper)',
+        background: 'var(--paper-white)',
       }}>
         <form onSubmit={handleSubmit as any}>
-          <div style={{
-            display: 'flex',
-            gap: 8,
-            alignItems: 'flex-end',
-          }}>
-            <div style={{
-              flex: 1,
-              border: '1px solid var(--hairline)',
-              padding: '10px 14px',
-              transition: 'border-color 150ms',
-            }}
-            onFocusCapture={e => setShowExamples(false)}
-            >
+          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
+            <div style={{ flex: 1, border: '2px solid var(--wired-black)', padding: '10px 14px' }}>
               <textarea
                 ref={inputRef as any}
                 value={input}
@@ -307,7 +248,7 @@ export default function ChatWindow() {
                   el.style.height = 'auto'
                   el.style.height = Math.min(el.scrollHeight, 120) + 'px'
                 }}
-                onKeyDown={handleKeyDown}
+                onKeyDown={onKeyDown}
                 placeholder="Escribe tu consulta..."
                 rows={1}
                 disabled={loading}
@@ -316,9 +257,10 @@ export default function ChatWindow() {
                   border: 'none',
                   outline: 'none',
                   resize: 'none',
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: '0.875rem',
-                  color: 'var(--body)',
+                  fontFamily: 'var(--font-ui)',
+                  fontSize: '1rem',
+                  fontWeight: 400,
+                  color: 'var(--page-ink)',
                   background: 'transparent',
                   maxHeight: 120,
                   lineHeight: 1.5,
@@ -328,17 +270,17 @@ export default function ChatWindow() {
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className="btn"
-              style={{ padding: '10px 16px', flexShrink: 0, fontSize: '0.6875rem' }}
+              className="btn-primary"
+              style={{ padding: '12px 20px', fontSize: '0.875rem', flexShrink: 0 }}
             >
               {loading ? '...' : 'Enviar'}
             </button>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
-            <span className="kicker" style={{ fontSize: '0.625rem' }}>
-              {isOnline ? 'Asistente técnico IA' : 'Modo offline'}
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, minHeight: 18 }}>
+            <span className="timestamp" style={{ fontSize: '0.625rem', letterSpacing: '0.8px' }}>
+              Asistente técnico IA
             </span>
-            <span className="kicker" style={{ fontSize: '0.625rem' }}>
+            <span className="timestamp" style={{ fontSize: '0.625rem', letterSpacing: '0.8px' }}>
               ⏎ Enviar · ⇧⏎ Salto
             </span>
           </div>

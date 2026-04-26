@@ -1,211 +1,383 @@
-/* ===== DataBot — WIRED Magazine Design System ===== */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
+/* ===== DataBot — WIRED Magazine Design System v2 ===== */
+/* Typeface roles (substituted via font-family notes in spec):
+   WiredDisplay  → Playfair Display (+0.10 line-height loosen)
+   BreveText     → Lora
+   Apercu        → Inter
+   WiredMono     → IBM Plex Mono
+   ProximaNova   → Inter (fallback)
+*/
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* ===== CSS Custom Properties ===== */
+/* ===== 2. Color Palette & Roles ===== */
 :root {
   /* Editorial Ink */
-  --ink: #000000;
+  --wired-black: #000000;
   --page-ink: #1a1a1a;
-  --paper: #ffffff;
+  --paper-white: #ffffff;
   --link-blue: #057dbc;
 
-  /* Surfaces */
+  /* Surface */
   --footer-ink: #1a1a1a;
-  --hairline: #e2e8f0;
+  --hairline-tint: #e2e8f0;
+  --caption-gray: #757575;
+  --disabled-gray: #999999;
+  --border-gray: #4a5568;
 
-  /* Text */
-  --headline: #1a1a1a;
-  --body: #1a1a1a;
-  --caption: #757575;
-  --disabled: #999999;
-
-  /* Typography stacks */
-  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  /* Typeface assignments (substituted) */
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body: Lora, Georgia, 'Times New Roman', serif;
+  --font-ui: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
-  --font-sans: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-  /* Spacing */
+  /* Spacing (base: 8px) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 40px;
+  --space-8: 48px;
+  --space-9: 64px;
+
+  /* Max content width */
+  --max-col: 1280px;
   --measure: 680px;
-  --gutter: 24px;
-  --rule: 1px;
 
-  /* Tracking */
-  --tracking-kicker: 0.08em;
-  --tracking-wide: 0.04em;
+  /* Elevation — always flat */
+  --depth-0: none;
+  --depth-1: 1px solid var(--hairline-tint);   /* quiet divider */
+  --depth-2: 1px solid var(--wired-black);       /* printerly rule */
+  --depth-3: 2px solid var(--wired-black);       /* interactive border */
+  --depth-4: var(--wired-black) fill;            /* black ribbon */
+  --depth-5: var(--footer-ink) fill;             /* footer zone */
 }
 
 /* ===== Reset & Base ===== */
-* {
-  box-sizing: border-box;
-}
+*, *::before, *::after { box-sizing: border-box; }
 
-html {
-  font-size: 16px;
-  -webkit-text-size-adjust: 100%;
-}
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
 
 body {
-  font-family: var(--font-sans);
   margin: 0;
   padding: 0;
-  background: var(--paper);
-  color: var(--body);
+  background: var(--paper-white);
+  color: var(--page-ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.6;
+  font-family: var(--font-ui);
+  line-height: 1.5;
 }
 
-/* Scrollbar — thin, square */
-::-webkit-scrollbar {
-  width: 4px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--hairline);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--caption);
-}
+/* ===== Scrollbar — thin, no rounding ===== */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--caption-gray); }
 
-/* Selection */
-::selection {
-  background: var(--ink);
-  color: var(--paper);
-}
+/* ===== Selection ===== */
+::selection { background: var(--wired-black); color: var(--paper-white); }
 
-/* ===== Typography ===== */
-h1, h2, h3 {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--headline);
+/* ===== Typography Hierarchy ===== */
+
+/* Display Headline (Hero) — WiredDisplay / Playfair Display */
+.display-hero {
+  font-family: var(--font-display);
+  font-size: 4rem;          /* 64px */
+  font-weight: 400;
+  line-height: 1.05;        /* 0.93 + 0.12 loosen for substitute */
+  letter-spacing: -0.5px;
+  color: var(--page-ink);
   margin: 0;
 }
 
-h1 { font-size: 2.5rem; }
-h2 { font-size: 1.75rem; }
-h3 { font-size: 1.25rem; }
-
-p, li {
-  font-family: var(--font-sans);
-  font-size: 0.9375rem;
-  line-height: 1.65;
-  color: var(--body);
+/* Display Headline (Mobile/Mid) — WiredDisplay */
+.display-mid {
+  font-family: var(--font-display);
+  font-size: 1.625rem;      /* 26px */
+  font-weight: 400;
+  line-height: 1.18;        /* 1.08 + 0.10 loosen */
+  color: var(--page-ink);
+  margin: 0;
 }
 
-/* Mono kicker utility — the WIRED signature */
+/* Section Heading — Apercu / Inter Bold */
+.section-heading {
+  font-family: var(--font-ui);
+  font-size: 1.25rem;       /* 20px */
+  font-weight: 700;
+  line-height: 1.20;
+  letter-spacing: -0.28px;
+  color: var(--page-ink);
+  margin: 0;
+}
+
+/* Subheading — Apercu Bold */
+.subheading {
+  font-family: var(--font-ui);
+  font-size: 1.0625rem;     /* 17px */
+  font-weight: 700;
+  line-height: 1.29;
+  letter-spacing: -0.144px;
+  color: var(--page-ink);
+  margin: 0;
+}
+
+/* Article Deck (Serif) — BreveText / Lora */
+.article-deck {
+  font-family: var(--font-body);
+  font-size: 1.1875rem;     /* 19px */
+  font-weight: 400;
+  line-height: 1.47;
+  letter-spacing: 0.108px;
+  color: var(--page-ink);
+  margin: 0;
+}
+
+/* Article Body (Serif) — BreveText / Lora */
+.article-body {
+  font-family: var(--font-body);
+  font-size: 1rem;          /* 16px */
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.09px;
+  color: var(--page-ink);
+  margin: 0;
+}
+
+/* UI Heading — Apercu / Inter Bold */
+.ui-heading {
+  font-family: var(--font-ui);
+  font-size: 1rem;          /* 16px */
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.3px;
+  color: var(--page-ink);
+  margin: 0;
+}
+
+/* Button Label — Apercu / Inter Bold Caps */
+.btn-label {
+  font-family: var(--font-ui);
+  font-size: 1rem;          /* 16px */
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--page-ink);
+}
+
+/* Eyebrow / Kicker — WiredMono / IBM Plex Mono UPPERCASE */
 .kicker {
   font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 600;
+  font-size: 0.8125rem;     /* 13px */
+  font-weight: 400;
+  line-height: 1.23;
+  letter-spacing: 0.92px;
   text-transform: uppercase;
-  letter-spacing: var(--tracking-kicker);
-  color: var(--caption);
+  color: var(--page-ink);
   margin: 0;
 }
 
-/* Hairline rule */
+.kicker-bold {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;     /* 13px */
+  font-weight: 700;
+  line-height: 1.23;
+  text-transform: uppercase;
+  color: var(--page-ink);
+  margin: 0;
+}
+
+/* Section Ribbon — WiredMono Black Bar */
+.section-ribbon,
+.ribbon-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;       /* 12px */
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--paper-white);
+}
+
+/* Timestamp / Meta — WiredMono */
+.timestamp {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;       /* 12px */
+  font-weight: 400;
+  line-height: 1.33;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--caption-gray);
+}
+
+/* Photo Caption — BreveText / Lora Bold */
+.photo-caption {
+  font-family: var(--font-body);
+  font-size: 0.795rem;      /* 12.73px */
+  font-weight: 700;
+  line-height: 2.2;
+  letter-spacing: 0.108px;
+  color: var(--page-ink);
+}
+
+/* ===== Hairline Rule ===== */
 hr {
   border: none;
-  border-top: var(--rule) solid var(--hairline);
+  border-top: 1px solid var(--hairline-tint);
   margin: 0;
 }
 
-/* ===== Layout ===== */
-.container {
-  max-width: var(--measure);
-  margin: 0 auto;
-  padding: 0 var(--gutter);
+.hairline-black {
+  border-top: 1px solid var(--wired-black);
 }
 
-/* ===== Buttons ===== */
-.btn {
+/* ===== Components ===== */
+
+/* Buttons */
+.btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 20px;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-wide);
-  background: var(--paper);
-  color: var(--ink);
-  border: 2px solid var(--ink);
+  padding: 12px 24px;
+  background: var(--paper-white);
+  color: var(--wired-black);
+  border: 2px solid var(--wired-black);
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
   cursor: pointer;
-  transition: background 150ms ease, color 150ms ease;
+  transition: background 150ms, color 150ms;
   text-decoration: none;
-  border-radius: 0; /* square corners */
+  border-radius: 0;
 }
 
-.btn:hover {
-  background: var(--ink);
-  color: var(--paper);
+.btn-primary:hover {
+  background: var(--wired-black);
+  color: var(--paper-white);
 }
 
-.btn:disabled {
+.btn-primary:disabled {
   opacity: 0.3;
   cursor: not-allowed;
   pointer-events: none;
 }
 
+/* Inverted button (for dark zones) */
+.btn-inverted {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--wired-black);
+  color: var(--paper-white);
+  border: 2px solid var(--paper-white);
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+  border-radius: 0;
+}
+
+.btn-inverted:hover {
+  background: var(--paper-white);
+  color: var(--wired-black);
+}
+
+/* Black Ribbon */
+.ribbon-bar {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 16px;
+  background: var(--wired-black);
+  color: var(--paper-white);
+}
+
+/* Round icon button (the ONLY circular shape) */
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--caption-gray);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 150ms;
+}
+
+.icon-btn:hover {
+  border-color: var(--wired-black);
+}
+
+/* Text pill (only for inline spans like "BREAKING") */
+.pill-text {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 1920px;
+  background: var(--wired-black);
+  color: var(--paper-white);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 /* ===== Links ===== */
 a {
-  color: inherit;
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: border-color 150ms ease, color 150ms ease;
+  color: var(--page-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 150ms;
 }
 
 a:hover {
   color: var(--link-blue);
-  border-bottom-color: var(--link-blue);
+}
+
+/* ===== Section Hairlines ===== */
+.section-rule {
+  border: none;
+  border-top: 1px solid var(--wired-black);
+  margin: var(--space-6) 0;
+}
+
+/* ===== Links Hover ===== */
+.link-underline {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: text-decoration-color 150ms, color 150ms;
+}
+
+.link-underline:hover {
+  color: var(--link-blue);
+  text-decoration-color: var(--link-blue);
 }
 
 /* ===== Animations ===== */
-@keyframes typeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes dotPulse {
-  0%, 80%, 100% {
-    opacity: 0.2;
-    transform: scale(1);
-  }
-  40% {
-    opacity: 1;
-    transform: scale(1.1);
-  }
+  0%, 80%, 100% { opacity: 0.15; }
+  40% { opacity: 0.7; }
 }
 
-.animate-type-in {
-  animation: typeIn 200ms ease-out both;
+.animate-in {
+  animation: fadeInUp 200ms ease-out both;
 }
 
 /* ===== Focus ===== */
 *:focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--wired-black);
   outline-offset: 2px;
-}
-
-/* ===== Utility ===== */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
 }
