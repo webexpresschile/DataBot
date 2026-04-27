@@ -111,7 +111,17 @@ export default function ChatWindow() {
     setMessages(prev => { const u = [...prev, aMsg]; cacheMessages(u); return u })
   }
 
-  function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+  function resetChat() {
+  localStorage.removeItem('databot_messages')
+  localStorage.removeItem('databot_pending')
+  setMessages([])
+  setShowExamples(true)
+  setPendingMessages([])
+  setSessionId('device_' + Math.random().toString(36).substr(2, 9))
+  setInput('')
+}
+
+function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(e as any) }
   }
 
@@ -129,6 +139,26 @@ export default function ChatWindow() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <span className="ribbon-label" style={{ fontSize: '0.6875rem', letterSpacing: '1px' }}>Teknocopy</span>
+          {messages.length > 0 && (
+            <span
+              onClick={resetChat}
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.625rem',
+                color: '#999',
+                letterSpacing: '0.8px',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                textUnderlineOffset: 2,
+                transition: 'color 150ms',
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = 'var(--paper-white)'}
+              onMouseLeave={e => e.currentTarget.style.color = '#999'}
+            >
+              + Nueva consulta
+            </span>
+          )}
           <span style={{
             fontFamily: 'var(--font-mono)',
             fontSize: '0.625rem',
