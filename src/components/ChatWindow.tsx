@@ -143,20 +143,23 @@ function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
             <span
               onClick={resetChat}
               style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '4px 12px',
+                background: '#0000fa',
+                color: '#fff',
                 fontFamily: 'var(--font-mono)',
                 fontSize: '0.625rem',
-                color: '#999',
-                letterSpacing: '0.8px',
+                letterSpacing: '1px',
                 textTransform: 'uppercase',
                 cursor: 'pointer',
-                textDecoration: 'underline',
-                textUnderlineOffset: 2,
-                transition: 'color 150ms',
+                transition: 'opacity 150ms',
               }}
-              onMouseEnter={e => e.currentTarget.style.color = 'var(--paper-white)'}
-              onMouseLeave={e => e.currentTarget.style.color = '#999'}
+              onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
+              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
             >
-              + Nueva consulta
+              + Nueva
             </span>
           )}
           <span style={{
